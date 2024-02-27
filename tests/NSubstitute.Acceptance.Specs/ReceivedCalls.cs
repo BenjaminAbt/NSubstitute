@@ -273,6 +273,30 @@ public class ReceivedCalls
     }
 
     [Test]
+    [TestCase(1)]
+    [TestCase(2)]
+    [TestCase(10)]
+    public void Check_call_was_received_at_least_of_times(int numberOfCalls)
+    {
+        for (var i = 0; i < numberOfCalls; i++)
+        {
+            _car.Idle();
+        }
+
+        for (int i = 0; i < numberOfCalls; i++)
+        {
+            _car.Received(Quantity.AtLeast(i)).Idle();
+            _car.ReceiveAtLeast(i).Idle();
+        }
+
+        int outOfRangeCallNumber = numberOfCalls +1;
+        var ex = Assert.Throws<ReceivedCallsException>(() =>
+            _car.Received(Quantity.AtLeast(outOfRangeCallNumber)).Idle()
+            );
+        StringAssert.Contains($"at least {outOfRangeCallNumber} (inclusive) calls", ex.Message);
+    }
+
+    [Test]
     public void Throw_when_call_was_not_received_within_a_range_of_times()
     {
         _car.Idle();

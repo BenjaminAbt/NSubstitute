@@ -52,6 +52,7 @@ public abstract class Quantity
 {
     public static Quantity Exactly(int number) { return number == 0 ? None() : new ExactQuantity(number); }
     public static Quantity AtLeastOne() { return new AnyNonZeroQuantity(); }
+    public static Quantity AtLeast(int minInclusive) { return new MinQuantity(minInclusive); }
     public static Quantity None() { return new NoneQuantity(); }
     /// <summary>
     /// A non-zero quantity between the given minimum and maximum numbers (inclusive).
@@ -196,6 +197,30 @@ public abstract class Quantity
         {
             var count = items.Count();
             return count >= minInclusive && count <= maxInclusive;
+        }
+
+        public override bool RequiresMoreThan<T>(IEnumerable<T> items) => items.Count() < minInclusive;
+    }
+    private class MinQuantity : Quantity
+    {
+        private readonly int minInclusive;
+        public MinQuantity(int minInclusive)
+        {
+            if (minInclusive < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(minInclusive),
+                    $"{nameof(minInclusive)} must be >= 0, but was {minInclusive}.");
+            }
+
+            this.minInclusive = minInclusive;
+        }
+        public override string Describe(string singularNoun, string pluralNoun) =>
+            $"at least {minInclusive} (inclusive) {((minInclusive == 1) ? singularNoun : pluralNoun)}";
+
+        public override bool Matches<T>(IEnumerable<T> items)
+        {
+            var count = items.Count();
+            return count >= minInclusive;
         }
 
         public override bool RequiresMoreThan<T>(IEnumerable<T> items) => items.Count() < minInclusive;

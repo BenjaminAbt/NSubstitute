@@ -32,6 +32,16 @@ public static partial class SubstituteExtensions
     }
 
     /// <summary>
+    /// Checks this substitute has received the following call the minimum required number of times.
+    /// </summary>
+    public static T ReceiveAtLeast<T>(this T substitute, int minRequiredNumberOfCalls) where T : class
+    {
+        if (substitute == null) throw new NullSubstituteReferenceException();
+
+        return substitute.Received(Quantity.AtLeast(minRequiredNumberOfCalls));
+    }
+
+    /// <summary>
     /// Checks this substitute has not received the following call.
     /// </summary>
     public static T DidNotReceive<T>(this T substitute) where T : class
